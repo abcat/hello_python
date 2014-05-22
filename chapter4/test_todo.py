@@ -1,7 +1,7 @@
 #-*-coding:utf-8-*-
 #!/usr/bin/env python
 import todo
-
+import os
 
 def test_create_todo():
     todo.todos = []
@@ -89,6 +89,20 @@ def test_wrap_text():
     assert "very long description" in lines[1]
     print("Ok-wrap_text")
 
+def test_save_todo_list():
+    todos_original = [{"title": "test todo",
+        "description": "This is a test",
+        "level": "Important"}]
+    todo.todos = todos_original
+    assert "todo.pickle" not in os.listdir(".")
+
+    todo.save_todo_list()
+    assert "todo.pickle" in os.listdir(".")
+
+    todo.load_todo_list()
+    assert todo.todos == todos_original
+    os.unlink("todo.pickle")
+    print("Ok-save_todo_list")
 
 if __name__ == '__main__':
     test_create_todo()
@@ -98,3 +112,4 @@ if __name__ == '__main__':
     test_show_todos()
     test_todo_sort_order()
     test_wrap_text()
+    test_save_todo_list()

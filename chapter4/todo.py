@@ -1,5 +1,7 @@
 #-*-coding:utf8-*-
 import textwrap
+import pickle
+import os
 
 
 todos = []
@@ -24,7 +26,7 @@ def todo_sort_order(todos):
 def wrap_text(todo, index):
     wraped_title = textwrap.wrap(todo["title"], 16)
     wraped_descr = textwrap.wrap(todo["description"], 24)
-    
+
     output = str(index + 1).ljust(8)
     output += wraped_title[0].ljust(16) + "  "
     output += wraped_descr[0].ljust(24) + "  "
@@ -63,6 +65,17 @@ def show_todos(todos):
         output += wrap_text(todo, index)
     return output
 
+def save_todo_list():
+    save_file = file("todo.pickle", "w")
+    pickle.dump(todos, save_file)
+    save_file.close()
+
+def load_todo_list():
+    global todos
+    if os.access("todo.pickle", os.F_OK):
+        save_file = file("todo.pickle")
+        todos = pickle.load(save_file)
+
 
 def get_input(fields):
     user_input = {}
@@ -100,12 +113,14 @@ commands = {
 
 def mainloop():
     user_input = ""
+    load_todo_list()
     while True:
         print run_command(user_input)
         user_input = raw_input(">")
         if user_input.lower().startswith("quit"):
             print("Exit")
             break
+    save_todo_list()
 
 if __name__ == '__main__':
     mainloop()
