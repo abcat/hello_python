@@ -1,4 +1,6 @@
 #-*-coding:utf8-*-
+import textwrap
+
 
 todos = []
 def create_todo(todos, title, description, level):
@@ -6,6 +8,61 @@ def create_todo(todos, title, description, level):
             "description": description,
             "level": level}
     todos.append(todo)
+    return ("Successed add %s todo item" %(title))
+
+def todo_sort_order(todos):
+    important = [todo for todo in todos
+            if todo["level"].lower() == "important"]
+    medium = [todo for todo in todos
+            if todo["level"].lower() != "important" and
+            todo["level"].lower() != "unimportant"]
+    unimportant = [todo for todo in todos
+            if todo["level"].lower() == "unimportant"]
+    sorted_todo = important + medium + unimportant
+    return sorted_todo
+
+def wrap_text(todo, index):
+    wraped_title = textwrap.wrap(todo["title"], 16)
+    wraped_descr = textwrap.wrap(todo["description"], 24)
+    
+    output = str(index + 1).ljust(8)
+    output += wraped_title[0].ljust(16) + "  "
+    output += wraped_descr[0].ljust(24) + "  "
+    output += todo["level"].ljust(16)
+    output += "\n"
+
+    max_len = max(len(wraped_title), len(wraped_descr))
+
+    for index in range(1, max_len):
+        output += " " * 8
+        if index < len(wraped_title):
+            output += wraped_title[index].ljust(18)
+        else:
+            output += " " * 18
+        if index < len(wraped_descr):
+            output += wraped_descr[index].ljust(26)
+        else:
+            output += " " * 26
+        output += "\n"
+    return output
+
+
+def show_todos(todos):
+    output = "Item".ljust(8) + "Title".ljust(18) + \
+            "Description".ljust(26) + "Level".ljust(16)
+    output += "\n"
+    sorted_todo = todo_sort_order(todos)
+    for index, todo in enumerate(sorted_todo):
+        # line = str(index + 1).ljust(8)
+        # for key, length in [("title", 16),
+        #                     ("description", 24),
+        #                     ("level", 16)]:
+        #     line += str(fields[key]).ljust(length)
+        # output += line
+        # output += "\n"
+        output += wrap_text(todo, index)
+    return output
+
 
 def get_input(fields):
     user_input = {}
@@ -37,7 +94,8 @@ def run_command(user_input, data=None):
 
 commands = {
             "new": [create_todo, ["title", "description", "level"]],
-            "test": [test, ["abcd", "hijk"]]
+            "test": [test, ["abcd", "hijk"]],
+            "show":[show_todos, []]
             }
 
 def mainloop():
