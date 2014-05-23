@@ -69,8 +69,8 @@ def test_todo_sort_order():
             {   "title": "Test important todo",
                 "description": "important todo",
                 "level": "important"}]
-
-    result = todo.todo_sort_order(todo.todos)
+    todo.todo_sort_order()
+    result = todo.todos
     assert "important" in result[0]["level"]
     assert "medium" in result[1]["level"]
     assert "unimportant" in result[2]["level"]
@@ -104,6 +104,43 @@ def test_save_todo_list():
     os.unlink("todo.pickle")
     print("Ok-save_todo_list")
 
+def test_todo_sort_after_creation():
+    todo.todos = [
+        {"title": "test unimportant title",
+        "description": "test unimportant description",
+        "level": "unimportant"},
+        {"title": "title medium title",
+            "description": "test medium description",
+            "level": "medium"},
+        ]
+    todo.create_todo(todo.todos, title="test Important test",
+            description="test important description",
+            level="important")
+    assert todo.todos[0]["level"] == "important"
+    assert todo.todos[1]["level"] == "medium"
+    assert todo.todos[2]["level"] == "unimportant"
+    print("Ok-sort_after_creation")
+
+def test_delete_todo():
+    todo.todos = [
+            {   "title": "Test unimportant todo",
+                "description": "unimportant todo",
+                "level": "unimportant"},
+            {   "title": "Test medium todo",
+                "description": "medium todo",
+                "level": "medium"},
+            {   "title": "Test important todo",
+                "description": "important todo",
+                "level": "important"}]
+    response = todo.delete_todo(todo.todos, which="2")
+
+    assert response == "Deleted todo #2"
+    assert len(todo.todos) == 2
+    assert todo.todos[1]["level"] == "important"
+    assert todo.todos[0]["level"] == "unimportant"
+    print("Ok-delete_todo")
+
+
 if __name__ == '__main__':
     test_create_todo()
     test_get_function()
@@ -113,3 +150,5 @@ if __name__ == '__main__':
     test_todo_sort_order()
     test_wrap_text()
     test_save_todo_list()
+    test_todo_sort_after_creation()
+    test_delete_todo()

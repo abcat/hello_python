@@ -10,9 +10,11 @@ def create_todo(todos, title, description, level):
             "description": description,
             "level": level}
     todos.append(todo)
+    todo_sort_order()
     return ("Successed add %s todo item" %(title))
 
-def todo_sort_order(todos):
+def todo_sort_order():
+    global todos
     important = [todo for todo in todos
             if todo["level"].lower() == "important"]
     medium = [todo for todo in todos
@@ -20,8 +22,7 @@ def todo_sort_order(todos):
             todo["level"].lower() != "unimportant"]
     unimportant = [todo for todo in todos
             if todo["level"].lower() == "unimportant"]
-    sorted_todo = important + medium + unimportant
-    return sorted_todo
+    todos = important + medium + unimportant
 
 def wrap_text(todo, index):
     wraped_title = textwrap.wrap(todo["title"], 16)
@@ -53,8 +54,7 @@ def show_todos(todos):
     output = "Item".ljust(8) + "Title".ljust(18) + \
             "Description".ljust(26) + "Level".ljust(16)
     output += "\n"
-    sorted_todo = todo_sort_order(todos)
-    for index, todo in enumerate(sorted_todo):
+    for index, todo in enumerate(todos):
         # line = str(index + 1).ljust(8)
         # for key, length in [("title", 16),
         #                     ("description", 24),
@@ -76,6 +76,43 @@ def load_todo_list():
         save_file = file("todo.pickle")
         todos = pickle.load(save_file)
 
+def test(todos, abcd, hijk):
+    return "Command 'test' returns:\n" + \
+            "abcd:" + abcd + "\nhijk:" + hijk
+
+def delete_todo(todos, which):
+    if not which.isdigit():
+        return ('"' + which + " needs to be the number of todo")
+    which = int(which)
+    if which < 1 or which > len(todos):
+        return ("'" + str(which) + " needs to be the number of a todo!")
+    del todos[which - 1]
+    return "Deleted todo #" + str(which)
+
+def edit_todo(todos, which, title, description, level):
+    if not which.isdigit():
+        return ("'" + str(which) + " needs to be the number of todo!")
+    which = int(which)
+    if which < 1 or which > len(todos):
+        return ("'" + str(which) + " needs to be the number of todo!")
+    todo = todos[which - -1]
+    if title !="":
+        todo["title"] = title
+    if description !="":
+        todo["description"] = description
+    if level != "":
+        todo["level"] = level
+    todo_sort_order()
+    return "Edited todo #" + str(which)
+
+commands = {
+            "new": [create_todo, ["title", "description", "level"]],
+            "test": [test, ["abcd", "hijk"]],
+            "show":[show_todos, []],
+            "del": [delete_todo,["which"]],
+            "edit": [[edit_todo], ["which", "title", "description",
+                "level"]]
+            }
 
 def get_input(fields):
     user_input = {}
@@ -89,10 +126,6 @@ def get_function(command):
 def get_field(command):
     return commands[command][1]
 
-def test(todos, abcd, hijk):
-    return "Command 'test' returns:\n" + \
-            "abcd:" + abcd + "\nhijk:" + hijk
-
 def run_command(user_input, data=None):
     user_input = user_input.lower()
     if user_input not in commands:
@@ -103,13 +136,9 @@ def run_command(user_input, data=None):
     if data is None:
         the_fields = get_field(user_input)
         data = get_input(the_fields)
-    return the_func(todos, **data)
 
-commands = {
-            "new": [create_todo, ["title", "description", "level"]],
-            "test": [test, ["abcd", "hijk"]],
-            "show":[show_todos, []]
-            }
+    #Pass global variable todos to functions that need parameters
+    return the_func(todos, **data)
 
 def mainloop():
     user_input = ""
